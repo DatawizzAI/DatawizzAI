@@ -1,55 +1,60 @@
-# DatawizzAI: Synthetic Data Generation Toolkit
+# Contributing to DatawizzAI
 
-Welcome to DatawizzAI, an open-source Python package that leverages the power of Large Language Models (LLMs) to define, augment, and transform tabular and textual datasets. DatawizzAI is designed to simplify and accelerate the process of synthetic data creation, providing developers with a robust toolkit to innovate and expand the boundaries of data science.
+We're thrilled that you're interested in contributing to DatawizzAI! This document provides guidelines for contributions to help maintain a welcoming and productive community.
 
-## Features
-- **Data Definition:** Easily define the structure and schema of your synthetic datasets.
-- **Data Augmentation:** Expand your datasets by generating synthetic data that adheres to your defined structure.
-- **Data Transformation:** Transform and enhance datasets by utilizing external knowledge for improved quality and insights.
-- **Datasource Connectors:** Integrate with various data sources to extract data structures from existing datasets. (Coming Soon)
-- **LLM Agnostic:** Connect to a variety of pre-trained LLMs for flexible data generation.
+## Code of Conduct
+
+Datawizz has adopted a Code of Conduct that we expect project participants to adhere to. Please read [the full text](LINK_TO_CODE_OF_CONDUCT) so that you can understand what actions will and will not be tolerated.
+
+## How to Contribute
+
+There are many ways to contribute to DatawizzAI:
+
+- Submit bugs and feature requests, and help us verify as they are checked in
+- Review source code changes
+- Review the documentation and make pull requests for anything from typos to additional and new content
 
 ## Getting Started
-1. **Installation:**
-```python 
-   pip install datawizzAI # Coming soon
-```
-2. **Quick Example:**
-```python 
-  from datawizzAI import DataDefiner, DataAugmentor, DataTransformer
-  
-  # Define your data schema
-  schema = DataDefiner.define_schema_from_description("Your data description here")
-  
-  # Generate synthetic data
-  synthetic_data = DataAugmentor.generate_data(schema)
-  
-  # Transform your data
-  transformed_data = DataTransformer.transform(src_data, "Your transformation description here"))
-```
-## Usage
-Check out the [documentation](https://github.com/DatawizzAI/DatawizzAI/blob/main/usage_examples.ipynb) for detailed usage examples and API references.
 
-## Contributing
-We welcome contributions from the community! Whether you're fixing a bug, adding a feature, or improving the docs, we appreciate your effort to make DatawizzAI better.
+- Make sure you have a [GitHub account](https://github.com/signup/free)
+- Familiarize yourself with the DatawizzAI repository and its documentation
+- Check the [issues](https://github.com/DatawizzAI/DatawizzAI/issues) for open discussions or start a new one
 
-- **Contribute Code:** Please submit a pull request with a clear description of your changes.
-- **Report Issues:** Use the issue tracker to report bugs or suggest enhancements.
-- **Write Documentation:** Help new users get started by improving documentation.
-See the [contributing guidelines](https://github.com/DatawizzAI/DatawizzAI/blob/main/CONTRIBUTING.md) for more information.
+## Making Changes
 
-## Roadmap
-- Add connectors for more data sources.
-- Enhance LLM connectivity to include more pre-trained models.
-- Optimize performance for large-scale data processing.
+1. Fork the repo on GitHub
+2. Clone the project to your machine
+3. Commit changes to your own branch
+4. Push your work back up to your fork
+5. Submit a Pull request so we can review your changes
 
-Note: Fine-tuning LLMs and support for vision/audio/multimodal data generation are currently out of the package's scope.
+**NOTE**: Be sure to merge the latest from "upstream" before making a pull request!
 
-## Support
-Need help? Join our [community forum](https://github.com/DatawizzAI/DatawizzAI/discussions) or reach out to us on [Slack](https://app.slack.com/client/T07446FN1QT/C0746PU91LL).
+## Pull Request Checklist
+
+- Describe the changes in the pull request title and in the description
+- Add unit or integration tests for fixed or new functionality
+- Ensure that the test suite passes
+- Ensure that your code follows the existing style
+
+## Reporting Bugs
+
+Use GitHub Issues to report bugs with DatawizzAI. Be sure to include:
+
+- A clear title and description
+- As much relevant information as possible
+- A code sample or an executable test case demonstrating the expected behavior that is not occurring
+
+## Documentation
+
+We are committed to providing high-quality documentation. If you find errors, omissions, or have suggestions, submit a pull request.
 
 ## License
-DatawizzAI is open-sourced under the MIT License.
 
-## Acknowledgments
-Thanks to all the contributors who have helped shape DatawizzAI. A special thanks to the organizations and developers behind the LLMs that make this project possible.
+By contributing to Datawizz, you agree that your contributions will be licensed under its MIT License.
+
+## Questions?
+
+If you have any questions, please feel free to [contact us](https://github.com/DatawizzAI/DatawizzAI/discussions).
+
+Thank you for your interest in contributing to DatawizzAI!
