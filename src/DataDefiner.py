@@ -128,7 +128,7 @@ class DataDefiner:
             PipelineName.ExamplesDataframeToTabular: """Generate Sample data that fit to the example structure given in the data description.\
                 Format the output as a JSONL file, where each line contains a single sampled text.""",
             PipelineName.APISpecificationToData: """Check the input and output of the API that is mentioned in the user desription, and generate synthetic API calls (with valid input and output) that fit to the required structure of this API.\
-                Format your output as JSONL, with the actual API name as key and each line containing the input and output of a synthetic API call.""",
+                Format your output as JSONL file, with the actual API name as key and each line containing the input object and the output object of a synthetic API call.""",
             PipelineName.UNKNOWN: '',
         }
         return switch_dict.get(pipeline_name, '')

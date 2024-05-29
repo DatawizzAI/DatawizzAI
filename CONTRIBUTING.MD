@@ -4,7 +4,7 @@ We're thrilled that you're interested in contributing to DatawizzAI! This docume
 
 ## Code of Conduct
 
-Datawizz has adopted a Code of Conduct that we expect project participants to adhere to. Please read [the full text](LINK_TO_CODE_OF_CONDUCT) so that you can understand what actions will and will not be tolerated.
+DatawizzAI has adopted a Code of Conduct that we expect project participants to adhere to. Please read [the full text](LINK_TO_CODE_OF_CONDUCT) so that you can understand what actions will and will not be tolerated.
 
 ## How to Contribute
 
@@ -51,7 +51,7 @@ We are committed to providing high-quality documentation. If you find errors, om
 
 ## License
 
-By contributing to Datawizz, you agree that your contributions will be licensed under its MIT License.
+By contributing to DatawizzAI, you agree that your contributions will be licensed under its MIT License.
 
 ## Questions?
 
