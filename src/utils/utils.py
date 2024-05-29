@@ -165,7 +165,7 @@ def create_json_sample_from_dataframes_dictionary(dataframes_dictionary, num_sam
     return json_result
 
 
-def compose_query_message(query, region, language, task_specifications=None):
+def compose_query_message(query, region=None, language=None, task_specifications=None):
     """
     Compose the query message based on region and language parameters.
 
