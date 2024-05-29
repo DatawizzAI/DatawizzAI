@@ -28,7 +28,7 @@ Welcome to DatawizzAI, an open-source Python package that leverages the power of
   transformed_data = DataTransformer.transform(src_data, "Your transformation description here"))
 ```
 ## Usage
-Check out the [documentation](https://github.com/DatawizzAI/DatawizzAI/blob/main/usage_examples.ipynb) for detailed usage examples and API references.
+Check out the [examples](https://github.com/DatawizzAI/DatawizzAI/blob/main/examples) for detailed usage examples and API references.
 
 ## Contributing
 We welcome contributions from the community! Whether you're fixing a bug, adding a feature, or improving the docs, we appreciate your effort to make DatawizzAI better.
