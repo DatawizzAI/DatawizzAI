@@ -16,16 +16,18 @@ Welcome to DatawizzAI, an open-source Python package that leverages the power of
 ```
 2. **Quick Example:**
 ```python 
-  from datawizzAI import DataDefiner, DataAugmentor, DataTransformer
-  
-  # Define your data schema
-  schema = DataDefiner.define_schema_from_description("Your data description here")
-  
+  from datawizzAI import DataGenerationPipeline, DataTransformer
+
   # Generate synthetic data
-  synthetic_data = DataAugmentor.generate_data(schema)
-  
+  DataGenerationPipelineObj = DataGenerationPipeline(llm = your_llm) # e.g. your_llm = ChatOpenAI(temperature=0.9, model="gpt-3.5-turbo")
+  sample_synthetic_data = DataGenerationPipelineObj.extract_sample_data( description="Your data description here")
+  full_synthetic_data = DataGenerationPipelineObj.generate_data(num_records = 30)
+
   # Transform your data
-  transformed_data = DataTransformer.transform(src_data, "Your transformation description here"))
+  DataTransformerObj = DataTransformer(llm=your_llm)
+  sample_transformed_data = DataTransformerObj.define_transformation(source_data={"data-name": source_dataframe}, description="Your transformation description here")
+  full_transformed_data = DataTransformerObj.transform(source_data=source_dataframe)
+
 ```
 ## Usage
 Check out the [examples](https://github.com/DatawizzAI/DatawizzAI/blob/main/examples) for detailed usage examples and API references.
