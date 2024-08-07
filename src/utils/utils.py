@@ -1,4 +1,5 @@
 import json
+import re
 
 
 def try_parse_json(sample_output):
@@ -12,7 +13,8 @@ def try_parse_json(sample_output):
     dict or None: The parsed JSON dictionary, or None if parsing fails.
     """
     try:
-        parsed_json = json.loads(sample_output)
+        parsed_json = json.dumps(sample_output)
+        parsed_json = json.loads(parsed_json)
         return parsed_json
     except json.JSONDecodeError as e:
         print(f"Error parsing JSON: {e}")
@@ -34,7 +36,9 @@ def parse_output(sample_output, results_dict=None):
         results_dict = {}
 
     try:
-        parsed_dict = try_parse_json(sample_output)
+        #parsed_dict = try_parse_json(sample_output)
+        parsed_dict = json.loads(sample_output)
+
         if parsed_dict is not None:
             for key, value in parsed_dict.items():
                 if key not in results_dict:
@@ -66,7 +70,8 @@ def parse_content_generated_concurrently(content, max_trials=3):
         trial = 0
         while trial < max_trials:
             try:
-                task_res = try_parse_json(task)
+                #task_res = try_parse_json(task)
+                task_res = json.loads(task)
                 for key, value in task_res.items():
                     if key not in output:
                         output[key] = pd.DataFrame(pd.json_normalize(value))
@@ -185,3 +190,77 @@ def compose_query_message(query, region=None, language=None, task_specifications
     if task_specifications:
         query_msg += f" ; The guidance given by an expert: {task_specifications}."
     return query_msg
+
+
+def sample_str_to_dataframes_dict(sample_data):
+    """
+    Convert a sample data string to a dictionary with table names as keys and pandas dataframe as items.
+
+    Parameters:
+    - sample_data (str): The sample data string to convert (assumed to be a JSON string).
+
+    Returns:
+    Dictionary: A dictionary with table names as keys and pandas dataframes as values.
+    """
+    dataframes_dict = {}
+    dataStructureSample = try_parse_json(sample_data)
+    json_data = json.loads(dataStructureSample)
+    has_keys = does_sample_contain_keys(dataStructureSample)
+    if (has_keys):
+        for key, items in json_data.items():
+            dataframes_dict[key] = pd.DataFrame.from_dict(items)
+    else:
+        dataframes_dict['data'] = pd.DataFrame.from_dict(json_data)
+    #finally:
+    return dataframes_dict
+
+def does_sample_contain_keys(sample_data):
+    """
+    Check if a sample data string (in json format) contains any keys.
+
+    Parameters:
+    - sample_data (str): The sample data string to check.(assumed to be a JSON string).
+
+    Returns:
+    Boolean: Yes or not.
+    """
+    dataStructureSample = try_parse_json(sample_data)
+    json_data = json.loads(dataStructureSample)
+    try:
+        for key, items in json_data.items():
+            return True
+    except:
+        return False
+
+def dataframes_dict_to_string(sample_dict):
+    """
+    Convert a sample data dictionary of dataframes to a valid json string.
+
+    Parameters:
+    - sample_dict (Dictionary): A dictionary with table names as keys and pandas dataframes as values.
+
+    Returns:
+    str: The sample data string to convert (assumed to be a JSON string).
+    """
+    results = ''
+    for key, items in sample_dict.items():
+        json_sample = items.to_json(orient='records')
+        results = results + f'{{,"{key}": {json_sample}}}'[1:-1]
+    results = '{'+results[1:]+'}'
+    return results
+
+def replace_param_value(text, param_name, new_param_value):
+    # Regular expression pattern to match 'param_name = param_value'
+    #pattern = rf'({re.escape(param_name)})\s*=\s*([^\s,]+)'
+    pattern = rf'\b({re.escape(param_name)})\b\s*=\s*(\d+)'
+
+    # Replacement function to insert the new param value
+    def replacement(match):
+        # match.group(1) is the parameter name
+        # match.group(2) is the old parameter value
+        return f"{match.group(1)} = {new_param_value}"
+
+    # Replace matched patterns with the new parameter value
+    new_text = re.sub(pattern, replacement, text)
+
+    return new_text

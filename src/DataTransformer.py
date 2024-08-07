@@ -1,5 +1,5 @@
 from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain, SequentialChain
+from langchain.chains import SequentialChain ,LLMChain
 from src.utils.utils import *
 import asyncio
 
@@ -20,6 +20,9 @@ class DataTransformer:
         self.src_data = src_data
         self.extracted_logic = None
         self.structure = ''
+        ###
+        self.description = ''
+        self.results = None
 
         # Template for extracting logic using the language model.
         logic_extraction_template = (
@@ -42,7 +45,7 @@ class DataTransformer:
 
         # Chain for extracting logic from user input.
         self.logic_extraction_chain = LLMChain(llm=llm, prompt=logic_extraction_prompt, output_key="extracted_logic")
-
+        #self.logic_extraction_chain = logic_extraction_prompt | llm
         # Template for transforming data based on the extracted logic.
         data_transformer_template = (
             "You are a system that specializes in enriching or transforming given source data with additional attributes "
@@ -66,6 +69,8 @@ class DataTransformer:
             verbose=True,
             output_key="transformed_data"
         )
+        #self.data_transformer_chain = data_transformer_prompt | llm
+
 
         # Sequential chain combining logic extraction and data transformation.
         self.overall_chain = SequentialChain(
@@ -105,85 +110,108 @@ class DataTransformer:
         print("Reached maximum trials for extraction. Returning None.")
         return None
 
-    def transform(self, source_data, batch_size=10, leading_key=''):
+    def transform(self, source_data, batch_size=10, output_format = 1):
         """
         Transforms the source data in batches based on previously extracted transformation logic.
 
         Parameters:
         - source_data (dict of pandas.DataFrame): The source data to be transformed.
         - batch_size (int): The number of records to process in each batch.
-        - leading_key (str, optional): The primary key used to align the batches. If not provided, the first key found is used.
 
         Returns:
         - dict: A dictionary containing the transformed data.
         """
-        if not source_data:
+        STRING_ = 0
+        JSON_ = 1
+        DATAFRAME_DICT_ = 2
+
+        if (source_data is None) or (len(source_data) == 0):
             return {}
 
-        leading_key = leading_key or next(iter(source_data), None)
-        if leading_key is None:
-            return {}  # Handle the case of empty input data
-
-        output_data = {key: [] for key in source_data}
-        total_records = len(source_data[leading_key])
+        output_data = None
+        total_records = len(source_data)
 
         for start_idx in range(0, total_records, batch_size):
             end_idx = min((start_idx + batch_size), total_records)
-            sample_data = {key: data[start_idx:end_idx].to_dict('records') for key, data in source_data.items() if
-                           isinstance(data, pd.DataFrame)}
+            sample_data = source_data[start_idx:end_idx].to_json(orient = 'records')
 
             try:
                 sample_json = json.dumps(sample_data)
                 transformed_json_str = self.data_transformer_chain.predict(
                     human_input=self.description, src_data=sample_json, extracted_logic=self.extracted_logic)
-                transformed_data = json.loads(transformed_json_str)
-
-                for key, items in transformed_data.items():
-                    output_data[key].extend(items)
+                #transformed_data = json.loads(transformed_json_str)
+                dataStructureSample = try_parse_json(transformed_json_str)
+                transformed_data = json.loads(dataStructureSample)
+                has_key = does_sample_contain_keys(transformed_json_str)
+                if has_key:
+                    key = next(iter(transformed_data.keys()))
+                    transformed_data = transformed_data[key]
             except Exception as e:
                 print(f"Error processing data from index {start_idx} to {end_idx}: {e}")
                 continue
+
+            if output_data is None:
+                output_data = transformed_data
+            else:
+                # output_data = pd.concat([output_data, transformed_data],ignore_index=True)
+                output_data = output_data + transformed_data
+
+        if output_format == STRING_:
+            output_data = json.dumps(output_data)
+        if output_format == DATAFRAME_DICT_:
+            output_data = pd.DataFrame.from_dict(output_data)
+
         return output_data
 
-    async def transform_in_parallel(self, source_data, batch_size=10, leading_key=''):
+
+    async def transform_in_parallel(self, source_data, batch_size=10, output_format = 1):
         """
         Asynchronously transforms the source data in batches based on previously extracted transformation logic.
         This function uses concurrency to process different chunks of the data in parallel.
 
         Parameters:
-        - source_data (dict of pandas.DataFrame): The source data to be transformed.
+        - source_data (pandas.DataFrame): The source data to be transformed.
         - batch_size (int): The number of records to process in each batch.
         - leading_key (str, optional): The primary key used to align the batches. If not provided, the first key found is used.
 
         Returns:
-        - dict: A dictionary containing the transformed data.
+        - A pandas dataframe containing the transformed data.
         """
-        if not source_data:
+        STRING_ = 0
+        JSON_ = 1
+        DATAFRAME_DICT_ = 2
+
+        if (source_data is None) or (len(source_data) == 0):
             return {}
 
-        leading_key = leading_key or next(iter(source_data), None)
-        if leading_key is None:
-            return {}  # Handle the case of empty input data
-
-        output_data = {key: [] for key in source_data}
-        total_records = len(source_data[leading_key])
+        output_data = None
+        total_records = len(source_data)
 
         # Preparing batch processing tasks
-        tasks = [self.process_batch(source_data, leading_key, start_idx, min(start_idx + batch_size, total_records))
+        tasks = [self.process_batch(source_data, start_idx, min(start_idx + batch_size, total_records))
                  for start_idx in range(0, total_records, batch_size)]
 
         # Execute tasks concurrently and gather results
         results = await asyncio.gather(*tasks)
-
+        print(results)
+        #for result in results:
+        #    output_data[leading_key].extend(result)
         # Combine results from all the asynchronous tasks
-        for result in results:
-            if result:
-                for key, items in result.items():
-                    output_data[key].extend(items)
+        for transformed_data in results:
+            if output_data is None:
+                output_data = transformed_data
+            else:
+                output_data = output_data + transformed_data
+
+        if output_format == STRING_:
+            output_data = json.dumps(output_data)
+        if output_format == DATAFRAME_DICT_:
+            output_data = pd.DataFrame.from_dict(output_data)
 
         return output_data
 
-    async def process_batch(self, source_data, leading_key, start_idx, end_idx):
+
+    async def process_batch(self, source_data, start_idx, end_idx):
         """
         Process a single batch of data asynchronously. Converts DataFrame to JSON, sends it for processing,
         and then integrates the results.
@@ -198,16 +226,22 @@ class DataTransformer:
         - dict: A dictionary containing the transformed data for the batch.
         """
         # Extract batch data and convert to JSON
-        batch_data = {key: df[start_idx:end_idx].to_dict('records') if key == leading_key else df for key, df in
-                      source_data.items()}
+        batch_data = source_data.assign(**source_data.select_dtypes(['datetime','datetime64', 'datetimetz']).astype(str).to_dict('list'))[start_idx:end_idx].to_json(orient="records")
         sample_json = json.dumps(batch_data)
 
         try:
             # Assuming predict is an asynchronous function
             transformed_json_str = await self.data_transformer_chain.apredict(
                 human_input=self.description, src_data=sample_json, extracted_logic=self.extracted_logic)
+            #transformed_json_str = try_parse_json(transformed_json_str)
             transformed_data = json.loads(transformed_json_str)
+            has_key = does_sample_contain_keys(transformed_json_str)
+            if has_key:
+                key = next(iter(transformed_data.keys()))
+                transformed_data = transformed_data[key]
+
             return transformed_data
         except Exception as e:
             print(f"Error processing data from index {start_idx} to {end_idx}: {e}")
             return {}
+
